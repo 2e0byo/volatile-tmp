@@ -22,3 +22,7 @@ chmod +x ./install.sh
 
 Dependencies: python, systemd
 
+* Problems?  Suggestions?
+
+[[mailto:2e0byo@gmail.como][Email Me]]
+
