@@ -9,8 +9,8 @@ The algorithm works as follows:
   time are deleted.
 
 - The age of every (sub) directory is calculated as that of the
-  youngest file in the directory, and the directory processed
-  accordingly.
+  youngest file in the directory (recursively), and the directory
+  processed accordingly.
 
 Diretories may contain a ~.volatile~ in which case it takes
 precedence.  Additionally, any directory containing a file called
