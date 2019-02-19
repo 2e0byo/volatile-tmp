@@ -3,7 +3,7 @@ import os
 from datetime import timedelta, datetime
 from shutil import rmtree
 
-tmpdir = "/home/john/volatile-tmp"
+tmpdir = os.path.expanduser("~/volatile-tmp")
 
 now = datetime.now()
 protected_files = ["readme.org", ".volatile"]
@@ -11,6 +11,7 @@ protected_files = ["readme.org", ".volatile"]
 
 def remove(p):
     """Remove file/dir by path"""
+    print("removing", p)
     try:
         os.remove(p)
     except IsADirectoryError:
