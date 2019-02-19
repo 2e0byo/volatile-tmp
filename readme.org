@@ -1,0 +1,24 @@
+#+Title: A volatile temporary directory
+
+Simple python script + systemd timer to manage a volatile temporary
+directory (default ~~/volatile-tmp~).  Files in this directory will be
+deleted once their last modification time is older than the expiry.
+Sub-directories can have different expiry times, or be temporarily
+preserved by dropping a file called ~.preserve~ in the top level of
+the subdir.
+
+The aim is something more reliable than ~/tmp~ (which disappears on
+boot) and more mangeable than just a dir ~~/tmp~.  Plus, if you dont
+exclude it from being backed up, the probability of finding a file if
+you really need it decays exponentially with your backup-clearing
+software ;)
+
+* Install
+
+#+BEGIN_SRC bash
+chmod +x ./install.sh
+./install.sh
+#+END_SRC
+
+Dependencies: python, systemd
+
