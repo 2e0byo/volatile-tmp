@@ -1,0 +1,17 @@
+#+Title: Volatile temporary files
+
+This directory is special: files in it expire and are deleted after a
+period.  The default period is set in [[file:.volatile][.volatile]].  
+
+The algorithm works as follows:
+
+- The age of every file is checked, and any files older than the expiry
+  time are deleted.
+
+- The age of every (sub) directory is calculated as that of the
+  youngest file in the directory, and the directory processed
+  accordingly.
+
+Diretories may contain a ~.volatile~ in which case it takes
+precedence.  Additionally, any directory containing a file called
+~.preserve~ will be ignored until that file is removed.
