@@ -19,7 +19,8 @@ ln -rs ./systemd/volatile-tmp.service ~/.config/systemd/user/
 ln -rs ./systemd/volatile-tmp.timer ~/.config/systemd/user/
 systemctl --user enable volatile-tmp.service
 systemctl --user enable volatile-tmp.timer
+systemctl --user start volatile-tmp.timer
 
 if [[ !  -d ~/volatile-tmp ]]; then
     cp -r template ~/volatile-tmp
-    fi
+fi
