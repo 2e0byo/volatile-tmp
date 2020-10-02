@@ -66,6 +66,7 @@ for entry in things:
             for f in files:
                 all_files.append(root + "/" + f)
         if len(all_files) == 0:  # cleanup empty dirs
+            print("Removing empty dir", entry.path)
             remove(entry.path)
         elif (
             datetime.utcfromtimestamp(
