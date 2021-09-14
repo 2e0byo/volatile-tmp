@@ -71,18 +71,17 @@ for entry in things:
             all_files = []
             for root, dirs, files in os.walk(entry.path):
                 for f in files:
-                    f = f"{root}/{f}"
+                    f = root + "/" + f
                     if os.path.islink(f) and not os.path.exists(f):
+                        logger.info("Removing dead symlink")
                         remove(f)
                     else:
                         all_files.append(f)
             if len(all_files) == 0:  # cleanup empty dirs
-                print("Removing empty dir", entry.path)
+                logger.info("Removing empty dir " + entry.path)
                 remove(entry.path)
             elif (
-                datetime.utcfromtimestamp(
-                    os.path.getmtime(max(all_files, key=os.path.getmtime))
-                )
+                datetime.utcfromtimestamp(max(os.path.getmtime(f) for f in all_files))
                 < dir_expiry
             ):
                 remove(entry.path)
