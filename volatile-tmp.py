@@ -2,6 +2,9 @@
 import os
 from datetime import datetime, timedelta
 from shutil import rmtree
+import logging
+
+logger = logging.getLogger(__name__)
 
 tmpdir = os.path.expanduser("~/volatile-tmp")
 
@@ -47,31 +50,42 @@ expiry = get_expiry(tmpdir)
 # scan
 things = os.scandir(tmpdir)
 for entry in things:
-    if not entry.is_dir():  # files first
-        if entry.name in protected_files:
-            continue
-        if datetime.utcfromtimestamp(entry.stat().st_mtime) < expiry:
-            remove(entry.path)
+    try:
 
-    else:
-        if os.path.isfile(entry.path + "/" + ".preserve"):
-            continue
-        try:
-            dir_expiry = get_expiry(entry.path)
-        except FileNotFoundError:
-            dir_expiry = expiry
-        # get newest file in subdir tree
-        all_files = []
-        for root, dirs, files in os.walk(entry.path):
-            for f in files:
-                all_files.append(root + "/" + f)
-        if len(all_files) == 0:  # cleanup empty dirs
-            print("Removing empty dir", entry.path)
-            remove(entry.path)
-        elif (
-            datetime.utcfromtimestamp(
-                os.path.getmtime(max(all_files, key=os.path.getmtime))
-            )
-            < dir_expiry
-        ):
-            remove(entry.path)
+        if not entry.is_dir():  # files first
+            if entry.name in protected_files:
+                continue
+            if os.path.islink(entry.path) and not os.path.exists(entry.path):
+                remove(entry.path)
+            if datetime.utcfromtimestamp(entry.stat().st_mtime) < expiry:
+                remove(entry.path)
+
+        else:
+            if os.path.isfile(entry.path + "/" + ".preserve"):
+                continue
+            try:
+                dir_expiry = get_expiry(entry.path)
+            except FileNotFoundError:
+                dir_expiry = expiry
+            # get newest file in subdir tree
+            all_files = []
+            for root, dirs, files in os.walk(entry.path):
+                for f in files:
+                    f = f"{root}/{f}"
+                    if os.path.islink(f) and not os.path.exists(f):
+                        remove(f)
+                    else:
+                        all_files.append(f)
+            if len(all_files) == 0:  # cleanup empty dirs
+                print("Removing empty dir", entry.path)
+                remove(entry.path)
+            elif (
+                datetime.utcfromtimestamp(
+                    os.path.getmtime(max(all_files, key=os.path.getmtime))
+                )
+                < dir_expiry
+            ):
+                remove(entry.path)
+
+    except Exception as e:
+        logger.exception(e)
