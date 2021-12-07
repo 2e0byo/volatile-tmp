@@ -3,10 +3,11 @@ import os
 from datetime import datetime, timedelta
 from shutil import rmtree
 import logging
+from time import perf_counter
 
 logger = logging.getLogger(__name__)
 
-tmpdir = os.path.expanduser("~/volatile-tmp")
+volatiledir = os.path.expanduser("~/volatile-tmp")
 
 now = datetime.now()
 protected_files = ("readme.org", ".volatile")
@@ -27,60 +28,78 @@ def get_expiry(directory: str):
         line = ""
         while line == "":
             line = f.readline().lstrip().rstrip()
+def cleanup_symlink(fn: str):
+    """Delete dangling symlinks."""
+    if os.path.islink(fn) and not os.path.exists(fn):
+        remove(path, "Dangling symlink.")
+        return True
 
-    d = {"weeks": 0, "days": 0, "hours": 0, "minutes": 0, "seconds": 0}
+    return False
 
-    for i in line.split(","):
-        components = i.split("=")
+
+def process_file(fn: str, path: str, expiry: datetime):
+    """Process an individual file"""
+    if fn in protected_files:
+        logger.debug(f"Skipping Protected file {fn}.")
+        return False
+
+    if cleanup_symlink(fn):
+        return True
+
+    if datetime.utcfromtimestamp(entry.stat().st_mtime) < expiry:
+        remove(entry.path, "File expired.")
+        return True
+
+    return False
+
+
+if __name__ == "__main__":
+
+    expiry = get_expiry(volatiledir)
+
+    # scan
+    for entry in os.scandir(volatiledir):
+        logger.debug(f"Considering {entry}")
         try:
-            d[components[0]] = float(components[1])
-        except:
-            pass
-    expiry = now - timedelta(**d)
-    logger.info(f"Expiry is {expiry}")
-    return expiry
 
+            if not entry.is_dir():  # files first
+                process_file(entry.name, entry.path, expiry)
 
-expiry = get_expiry(tmpdir)
+            else:
+                if os.path.isfile(entry.path + "/" + ".preserve"):
+                    logger.debug(".preserve exists, skipping.")
+                    continue
+                try:
+                    dir_expiry = get_expiry(entry.path)
+                except FileNotFoundError:
+                    dir_expiry = expiry
 
-# scan
-things = os.scandir(tmpdir)
-for entry in things:
-    try:
+                # get newest file in subdir tree
+                logger.debug("Getting all files")
+                start = perf_counter()
+                newest = ()
 
-        if not entry.is_dir():  # files first
-            if entry.name in protected_files:
-                continue
-            if os.path.islink(entry.path) and not os.path.exists(entry.path):
-                remove(entry.path)
-            if datetime.utcfromtimestamp(entry.stat().st_mtime) < expiry:
-                remove(entry.path)
+                all_files = []
+                total = 0
+                for root, dirs, files in os.walk(entry.path):
+                    for fn in files:
+                        total += 1
+                        fn = root + "/" + fn
+                        if not cleanup_symlink(fn):
+                            newest = max(newest, (os.path.getmtime(fn), fn))
 
-        else:
-            if os.path.isfile(entry.path + "/" + ".preserve"):
-                continue
-            try:
-                dir_expiry = get_expiry(entry.path)
-            except FileNotFoundError:
-                dir_expiry = expiry
-            # get newest file in subdir tree
-            all_files = []
-            for root, dirs, files in os.walk(entry.path):
-                for f in files:
-                    f = root + "/" + f
-                    if os.path.islink(f) and not os.path.exists(f):
-                        logger.info("Removing dead symlink")
-                        remove(f)
-                    else:
-                        all_files.append(f)
-            if len(all_files) == 0:  # cleanup empty dirs
-                logger.info("Removing empty dir " + entry.path)
-                remove(entry.path)
-            elif (
-                datetime.utcfromtimestamp(max(os.path.getmtime(f) for f in all_files))
-                < dir_expiry
-            ):
-                remove(entry.path)
+                logger.debug(f"Scanned {total} files in {perf_counter() - start :>.3}s")
 
-    except Exception as e:
-        logger.exception(e)
+                if not newest:
+                    remove(entry.path, "Empty dir.")
+                else:
+                    modt, fn = newest
+                    modt = datetime.utcfromtimestamp(modt)
+                    if modt < dir_expiry:
+                        remove(
+                            entry.path,
+                            f"Newest file {fn} in dir expired: last modified {modt}.",
+                        )
+
+        except Exception as e:
+            logger.exception(e)
