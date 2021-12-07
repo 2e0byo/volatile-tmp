@@ -14,7 +14,7 @@ except ImportError:
     logging.basicConfig(level=getattr(logging, os.getenv("LOGLEVEL", "INFO")))
 
 
-volatiledir = os.path.expanduser("~/volatile-tmp")
+volatiledir = os.path.expanduser(os.getenv(VOLATILE_DIR, "~/volatile-tmp"))
 
 now = datetime.now()
 protected_files = ("readme.org", ".volatile")
