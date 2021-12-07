@@ -37,6 +37,8 @@ def get_expiry(directory: str):
         except:
             pass
     expiry = now - timedelta(**d)
+    logger.info(f"Expiry is {expiry}")
+    return expiry
 
 
 expiry = get_expiry(tmpdir)
