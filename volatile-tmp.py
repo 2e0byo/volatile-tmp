@@ -21,9 +21,9 @@ def remove(p):
         rmtree(p)
 
 
-def get_expiry(dir):
+def get_expiry(directory):
     """read .volatile in dir into timedelta."""
-    with open(dir + "/.volatile", "r") as f:
+    with open(directory + "/.volatile", "r") as f:
         line = ""
         while line == "":
             line = f.readline().lstrip().rstrip()
