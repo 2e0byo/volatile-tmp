@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 tmpdir = os.path.expanduser("~/volatile-tmp")
 
 now = datetime.now()
-protected_files = ["readme.org", ".volatile"]
+protected_files = ("readme.org", ".volatile")
 
 
 def remove(p):
