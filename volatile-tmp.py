@@ -24,10 +24,19 @@ def remove(p: str, reason: str = None):
 
 def get_expiry(directory: str):
     """read .volatile in dir into timedelta."""
+    data = {"weeks": 0, "days": 0, "hours": 0, "minutes": 0, "seconds": 0}
+
     with open(directory + "/.volatile", "r") as f:
-        line = ""
-        while line == "":
-            line = f.readline().lstrip().rstrip()
+        for line in f:
+            data.update(
+                {k: float(v) for part in line.split(",") for k, v in [part.split("=")]}
+            )
+
+    expiry = now - timedelta(**data)
+    logger.info(f"Files older than {expiry} in {directory} will be removed.")
+    return expiry
+
+
 def cleanup_symlink(fn: str):
     """Delete dangling symlinks."""
     if os.path.islink(fn) and not os.path.exists(fn):
