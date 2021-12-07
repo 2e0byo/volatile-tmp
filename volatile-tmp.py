@@ -36,13 +36,7 @@ def get_expiry(directory: str):
             d[components[0]] = float(components[1])
         except:
             pass
-    return now - timedelta(
-        weeks=d["weeks"],
-        days=d["days"],
-        hours=d["hours"],
-        minutes=d["minutes"],
-        seconds=d["seconds"],
-    )
+    expiry = now - timedelta(**d)
 
 
 expiry = get_expiry(tmpdir)
