@@ -12,9 +12,9 @@ now = datetime.now()
 protected_files = ("readme.org", ".volatile")
 
 
-def remove(p):
+def remove(p: str, reason: str = None):
     """Remove file/dir by path."""
-    print("removing", p)
+    logger.info(f"Removing {p}" + f" Reason: {reason}" if reason else "")
     try:
         os.remove(p)
     except IsADirectoryError:
