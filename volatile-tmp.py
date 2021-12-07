@@ -6,6 +6,13 @@ import logging
 from time import perf_counter
 
 logger = logging.getLogger(__name__)
+try:
+    import coloredlogs
+
+    coloredlogs.install(level=getattr(logging, os.getenv("LOGLEVEL", "INFO")))
+except ImportError:
+    logging.basicConfig(level=getattr(logging, os.getenv("LOGLEVEL", "INFO")))
+
 
 volatiledir = os.path.expanduser("~/volatile-tmp")
 
