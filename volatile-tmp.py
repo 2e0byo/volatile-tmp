@@ -116,6 +116,10 @@ if __name__ == "__main__":
                             entry.path,
                             f"Newest file {fn} in dir expired: last modified {modt}.",
                         )
+                    else:
+                        logger.debug(
+                            f"Not removing latest file is {fn} with modification time {modt}"
+                        )
 
         except Exception as e:
             logger.exception(e)
