@@ -1,8 +1,8 @@
 #!/usr/bin/python3
+import logging
 import os
 from datetime import datetime, timedelta
 from shutil import rmtree
-import logging
 from time import perf_counter
 
 logger = logging.getLogger(__name__)
