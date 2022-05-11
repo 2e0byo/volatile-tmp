@@ -47,7 +47,7 @@ def get_expiry(directory: str):
 def cleanup_symlink(fn: str):
     """Delete dangling symlinks."""
     if os.path.islink(fn) and not os.path.exists(fn):
-        remove(path, "Dangling symlink.")
+        remove(fn, "Dangling symlink.")
         return True
 
     return False
@@ -59,7 +59,7 @@ def process_file(fn: str, path: str, expiry: datetime):
         logger.debug(f"Skipping Protected file {fn}.")
         return False
 
-    if cleanup_symlink(fn):
+    if cleanup_symlink(path):
         return True
 
     if datetime.utcfromtimestamp(entry.stat().st_mtime) < expiry:
