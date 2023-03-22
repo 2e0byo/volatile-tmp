@@ -1,7 +1,8 @@
 #!/bin/bash
-mkdir -p ~/bin
-ln -rs ./volatile-tmp.py ~/bin/
-chmod +x ~/bin/volatile-tmp.py
+TARGET=~/.local/bin
+mkdir -p $TARGET
+ln -rs ./volatile-tmp.py $TARGET/
+chmod +x $TARGET/volatile-tmp.py
 mkdir -p ~/.config/systemd/user/
 rm ./systemd/volatile-tmp.service
 cat<<EOF >./systemd/volatile-tmp.service
@@ -9,7 +10,7 @@ cat<<EOF >./systemd/volatile-tmp.service
 Description=Cleanup volatile tmp dir
 
 [Service]
-ExecStart=$HOME/bin/volatile-tmp.py
+ExecStart=$HOME/.local/bin/volatile-tmp.py
 
 
 [Install]
